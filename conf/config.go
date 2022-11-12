@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	AppHost       string
 	PrivateKey    *rsa.PrivateKey
 	PublicKey     *rsa.PublicKey
 	RefreshSecret string
@@ -70,5 +71,6 @@ func init() {
 	}
 
 	AESKey = os.Getenv("AES_KEY")
+	AppHost = os.Getenv("APP_DOMAIN")
 
 }

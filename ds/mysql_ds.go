@@ -33,6 +33,10 @@ func LoadDB() (*gorm.DB, error) {
 	// migrate DB
 	err = db.AutoMigrate(
 		&model.Bank{},
+		&model.Admin{},
+		&model.User{},
+		&model.Wallet{},
+		&model.Asset{},
 	)
 	if err != nil {
 		return nil, err
