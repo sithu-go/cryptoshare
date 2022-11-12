@@ -17,6 +17,8 @@ var (
 	PublicKey     *rsa.PublicKey
 	RefreshSecret string
 
+	AESKey string
+
 	INFURA_BASE_URL string
 	INFURA_API_KEY  string
 )
@@ -66,5 +68,7 @@ func init() {
 
 		}
 	}
+
+	AESKey = os.Getenv("AES_KEY")
 
 }
