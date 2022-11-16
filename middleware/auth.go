@@ -11,7 +11,6 @@ import (
 func AuthMiddleware(r *repository.Repository) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token, err := ctx.Cookie("token")
-		// res := &dto.Response{}
 		if err != nil {
 			if err == http.ErrNoCookie {
 				// If the cookie is not set, return an unauthorized status

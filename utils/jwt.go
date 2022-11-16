@@ -69,3 +69,23 @@ func ValidateAccessToken(tokenString string) (*Claims, error) {
 	return claims, nil
 
 }
+
+func GenerateRefreshToken(token string) (string, error) {
+	claim, err := ValidateAccessToken(token)
+	if err != nil {
+		return "", err
+	}
+
+	// We ensure that a new token is not issued until enough time has elapsed
+	// In this case, a new token will only be issued if the old token is within
+	// 30 seconds of expiry. Otherwise, return a bad request status
+	if time.Until(claim.ExpiresAt.Time) > 30*time.Second {
+		return "", errors.New("token is not expired, yet")
+	}
+
+	refreshToken, err := GenerateAccessToken(claim.Username, claim.IsAdmin)
+	if err != nil {
+		return "", err
+	}
+	return refreshToken, nil
+}

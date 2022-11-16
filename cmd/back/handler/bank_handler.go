@@ -5,7 +5,6 @@ import (
 	"cryptoshare/middleware"
 	"cryptoshare/repository"
 	"cryptoshare/utils"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,6 +26,8 @@ func (ctr *bankHandler) register() {
 	group := ctr.R.Group("/api/banks")
 	group.Use(middleware.AuthMiddleware(ctr.repo))
 	group.GET("", ctr.getBanks)
+
+	middleware.OTPMiddleware("admin")
 	group.POST("", ctr.addBank)
 	group.PATCH("", ctr.editBank)
 	group.DELETE("", ctr.deleteBanks)
@@ -116,13 +117,10 @@ func (ctr *bankHandler) editBank(c *gin.Context) {
 func (ctr *bankHandler) deleteBanks(c *gin.Context) {
 	req := dto.ReqByIDs{}
 	if err := c.ShouldBind(&req); err != nil {
-		fmt.Println(err, "SDDD")
 		res := utils.GenerateValidationErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)
 		return
 	}
-
-	fmt.Printf("%+v\n", req)
 
 	ids := utils.IdsIntToInCon(req.IDS)
 

@@ -85,3 +85,12 @@ func GenerateServerError(err error) *dto.Response {
 	res.HttpStatusCode = http.StatusInternalServerError
 	return res
 }
+
+func GenerateSuccessResponse(data any) *dto.Response {
+	res := &dto.Response{}
+	res.ErrCode = 0
+	res.ErrMsg = "Success"
+	res.Data = data
+	res.HttpStatusCode = http.StatusOK
+	return res
+}
