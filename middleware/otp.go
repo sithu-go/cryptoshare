@@ -28,7 +28,13 @@ func OTPMiddleware(userType string) gin.HandlerFunc {
 			return
 		}
 		// implement for user otp validation
-		// user := ctx.MustGet(userType).(mo)
+		user := ctx.MustGet(userType).(*model.User)
+		valid := utils.Validate2fa(req.OTP, user.OTPSecret)
+		if !valid {
+			ctx.Abort()
+			return
+		}
+
 		ctx.Next()
 	}
 }

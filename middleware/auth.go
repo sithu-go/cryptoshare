@@ -3,7 +3,6 @@ package middleware
 import (
 	"cryptoshare/repository"
 	"cryptoshare/utils"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -41,8 +40,13 @@ func AuthMiddleware(r *repository.Repository) gin.HandlerFunc {
 			}
 			ctx.Set("admin", admin)
 		} else {
-			// user, err := r.
-			fmt.Println("will implement later")
+			user, err := r.User.FindByField("username", claim.Username)
+			if err != nil {
+				res := utils.GenerateGormErrorResponse(err)
+				ctx.JSON(res.HttpStatusCode, res)
+				return
+			}
+			ctx.Set("user", user)
 		}
 		ctx.Next()
 
