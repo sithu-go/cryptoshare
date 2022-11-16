@@ -2,6 +2,7 @@ package handler
 
 import (
 	"cryptoshare/dto"
+	"cryptoshare/middleware"
 	"cryptoshare/repository"
 	"cryptoshare/utils"
 	"fmt"
@@ -24,6 +25,7 @@ func newBankHandler(h *Handler) *bankHandler {
 
 func (ctr *bankHandler) register() {
 	group := ctr.R.Group("/api/banks")
+	group.Use(middleware.AuthMiddleware(ctr.repo))
 	group.GET("", ctr.getBanks)
 	group.POST("", ctr.addBank)
 	group.PATCH("", ctr.editBank)

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"cryptoshare/cmd/back/middleware"
 	"cryptoshare/ds"
+	"cryptoshare/middleware"
 	"cryptoshare/repository"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +28,10 @@ func NewHandler(c *HConfig) *Handler {
 
 func (h *Handler) Register() {
 	h.R.Use(middleware.Cors())
+
+	// auth routes
+	authHandler := newAuthHandler(h)
+	authHandler.register()
 
 	// bank routes
 	bankHandler := newBankHandler(h)

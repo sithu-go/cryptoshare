@@ -62,3 +62,26 @@ func GenerateValidationErrorResponse(err error) *dto.Response {
 	res.HttpStatusCode = http.StatusInternalServerError
 	return res
 }
+
+func GenerateAuthErrorResponse(err error) *dto.Response {
+	res := &dto.Response{}
+	res.ErrCode = 401
+	res.ErrMsg = "pemission denied"
+	res.HttpStatusCode = http.StatusUnauthorized
+	return res
+}
+
+func GenerateBadRequestResponse(err error) *dto.Response {
+	res := &dto.Response{}
+	res.ErrCode = 400
+	res.ErrMsg = "invalid request"
+	res.HttpStatusCode = http.StatusBadRequest
+	return res
+}
+
+func GenerateServerError(err error) *dto.Response {
+	res := &dto.Response{}
+	res.ErrCode = 500
+	res.HttpStatusCode = http.StatusInternalServerError
+	return res
+}

@@ -19,3 +19,7 @@ type ReqByID struct {
 type ReqByIDs struct {
 	IDS []uint64 `json:"ids" form:"ids" binding:"required,gte=1"`
 }
+
+type OTPReq struct {
+	OTP string `json:"otp" binding:"required"`
+}
