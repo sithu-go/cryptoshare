@@ -8,6 +8,7 @@ require (
 	github.com/go-redis/redis/v9 v9.0.0-rc.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/google/uuid v1.3.0
+	github.com/ip2location/ip2location-go/v9 v9.5.0
 	github.com/joho/godotenv v1.4.0
 	github.com/pquerna/otp v1.3.0
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97

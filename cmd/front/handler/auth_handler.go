@@ -6,6 +6,7 @@ import (
 	"cryptoshare/model"
 	"cryptoshare/repository"
 	"cryptoshare/utils"
+	"log"
 	"net/http"
 	"time"
 
@@ -27,6 +28,7 @@ func newAuthHandler(h *Handler) *authHandler {
 func (ctr *authHandler) register() {
 	group := ctr.R.Group("/api/auth")
 	group.POST("/login", ctr.login)
+	group.POST("/register", ctr.singup)
 	group.Use(middleware.AuthMiddleware(ctr.repo))
 
 	group.POST("/refresh", ctr.refresh)
@@ -34,7 +36,46 @@ func (ctr *authHandler) register() {
 	group.POST("/generate/secret-key", ctr.generateSecretKey)
 	group.POST("/enable/2fa", middleware.OTPMiddleware("admin"), ctr.enable2FactorAuth)
 }
+func (ctr *authHandler) singup(c *gin.Context) {
+	req := dto.SingupReq{}
+	if err := c.ShouldBind(&req); err != nil {
+		res := utils.GenerateValidationErrorResponse(err)
+		c.JSON(res.HttpStatusCode, res)
+		return
+	}
 
+	area, err := utils.GetArea(c.ClientIP())
+	if err != nil {
+		log.Println(err)
+	}
+
+	hash, err := utils.HashPassword(req.Password)
+	if err != nil {
+		res := utils.GenerateServerError(err)
+		c.JSON(res.HttpStatusCode, res)
+		return
+	}
+
+	user := &model.User{
+		Name:     req.Name,
+		Username: req.Username,
+		Email:    req.Email,
+		Password: hash,
+		IP:       c.ClientIP(),
+		Location: area,
+	}
+
+	_, err = ctr.repo.User.Create(user)
+	if err != nil {
+		res := utils.GenerateGormErrorResponse(err)
+		c.JSON(res.HttpStatusCode, res)
+		return
+	}
+
+	res := utils.GenerateSuccessResponse(nil)
+	c.JSON(res.HttpStatusCode, res)
+
+}
 func (ctr *authHandler) login(c *gin.Context) {
 	req := dto.LoginReq{}
 	res := &dto.Response{}
