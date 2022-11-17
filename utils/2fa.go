@@ -41,8 +41,8 @@ func Create2fa(username string) (*otp.Key, error) {
 	return key, nil
 }
 
-func Validate2fa(token, secret string) bool {
-	trimmedToken := strings.TrimSpace(token)
+func Validate2fa(otp, secret string) bool {
+	trimmedToken := strings.TrimSpace(otp)
 
 	return totp.Validate(trimmedToken, secret)
 }

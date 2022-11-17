@@ -30,3 +30,10 @@ func (r *userRepository) FindByField(field, value string) (*model.User, error) {
 	err := db.First(&user, fmt.Sprintf("%s = ?", field), value).Error
 	return &user, err
 }
+
+func (r *userRepository) UpdateByFields(updateFields *model.UpdateFields) (*model.User, error) {
+	db := r.DB.Model(&model.User{})
+	db.Where(updateFields.Field, updateFields.Value)
+	err := db.Updates(updateFields.Data).Error
+	return nil, err
+}

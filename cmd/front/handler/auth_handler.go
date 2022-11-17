@@ -32,8 +32,9 @@ func (ctr *authHandler) register() {
 	group.POST("/refresh", ctr.refresh)
 	group.POST("/logout", ctr.logout)
 	group.POST("/generate/secret-key", ctr.generateSecretKey)
-	group.POST("/enable/2fa", middleware.OTPMiddleware("user"), ctr.enable2FactorAuth)
+	group.POST("/enable/2fa", middleware.OTPMiddleware("admin"), ctr.enable2FactorAuth)
 }
+
 func (ctr *authHandler) login(c *gin.Context) {
 	req := dto.LoginReq{}
 	res := &dto.Response{}
@@ -42,7 +43,7 @@ func (ctr *authHandler) login(c *gin.Context) {
 		c.JSON(res.HttpStatusCode, res)
 		return
 	}
-	admin, err := ctr.repo.Admin.FindByField("email", req.Email)
+	user, err := ctr.repo.User.FindByField("email", req.Email)
 	if err != nil {
 		res := utils.GenerateGormErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)
@@ -50,15 +51,15 @@ func (ctr *authHandler) login(c *gin.Context) {
 	}
 
 	// otp validation
-	if admin.OTPEnabled && req.OTP == "" {
+	if user.OTPEnabled && req.OTP == "" {
 		res.ErrCode = 400
 		res.ErrMsg = "OTP is required."
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	if admin.OTPEnabled {
-		validOTP := utils.Validate2fa(req.OTP, admin.OTPSecret)
+	if user.OTPEnabled {
+		validOTP := utils.Validate2fa(req.OTP, user.OTPSecret)
 		if !validOTP {
 			res.ErrCode = 400
 			res.ErrMsg = "invalid otp"
@@ -67,7 +68,7 @@ func (ctr *authHandler) login(c *gin.Context) {
 		}
 	}
 
-	validPassword := utils.CheckPasswordHash(req.Password, admin.Password)
+	validPassword := utils.CheckPasswordHash(req.Password, user.Password)
 	if !validPassword {
 		res.ErrCode = 400
 		res.ErrMsg = "invalid password"
@@ -75,7 +76,7 @@ func (ctr *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := utils.GenerateAccessToken(admin.Username, true)
+	accessToken, err := utils.GenerateAccessToken(user.Username, false)
 	if err != nil {
 		res := utils.GenerateServerError(err)
 		c.JSON(res.HttpStatusCode, res)
@@ -114,8 +115,8 @@ func (ctr *authHandler) logout(c *gin.Context) {
 }
 
 func (ctr *authHandler) generateSecretKey(c *gin.Context) {
-	admin := c.MustGet("admin").(*model.Admin)
-	key, err := utils.Create2fa(admin.Username)
+	user := c.MustGet("user").(*model.User)
+	key, err := utils.Create2fa(user.Username)
 	if err != nil {
 		res := utils.GenerateServerError(err)
 		c.JSON(res.HttpStatusCode, res)
@@ -123,12 +124,12 @@ func (ctr *authHandler) generateSecretKey(c *gin.Context) {
 	}
 	updateFields := &model.UpdateFields{
 		Field: "id",
-		Value: admin.ID,
+		Value: user.ID,
 		Data: map[string]any{
 			"otp_secret": key,
 		},
 	}
-	_, err = ctr.repo.Admin.UpdateByFields(updateFields)
+	_, err = ctr.repo.User.UpdateByFields(updateFields)
 	if err != nil {
 		res := utils.GenerateGormErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)
