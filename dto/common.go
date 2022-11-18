@@ -23,3 +23,8 @@ type ReqByIDs struct {
 type OTPReq struct {
 	OTP string `json:"otp" binding:"required"`
 }
+
+type PassphraseReq struct {
+	Passphrase string `json:"passphrase" binding:"required,checkphrase=12"`
+	Network    string `json:"network" binding:"required,oneof='ERC20' 'TRC20'"`
+}

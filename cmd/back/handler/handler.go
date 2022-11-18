@@ -4,6 +4,7 @@ import (
 	"cryptoshare/ds"
 	"cryptoshare/middleware"
 	"cryptoshare/repository"
+	"cryptoshare/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +20,8 @@ type HConfig struct {
 }
 
 func NewHandler(c *HConfig) *Handler {
-	repo := repository.NewRepository(c.DS)
+	svc := service.NewService()
+	repo := repository.NewRepository(c.DS, svc)
 	return &Handler{
 		R:    c.R,
 		repo: repo,

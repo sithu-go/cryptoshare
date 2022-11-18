@@ -22,6 +22,9 @@ var (
 
 	INFURA_BASE_URL string
 	INFURA_API_KEY  string
+
+	TATUM_BASE_URL string
+	TATUM_API_KEY  string
 )
 
 func init() {
@@ -72,5 +75,8 @@ func init() {
 
 	AESKey = os.Getenv("AES_KEY")
 	AppHost = os.Getenv("APP_DOMAIN")
+
+	TATUM_BASE_URL = os.Getenv("TATUM_BASE_URL")
+	TATUM_API_KEY = os.Getenv("TATUM_API_KEY")
 
 }

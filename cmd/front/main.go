@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"cryptoshare/cmd/back/handler"
+	"cryptoshare/cmd/front/handler"
 	_ "cryptoshare/conf"
 	"cryptoshare/ds"
 	"fmt"
