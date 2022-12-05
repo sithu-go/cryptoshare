@@ -190,7 +190,7 @@ func (ctr *authHandler) enable2FactorAuth(c *gin.Context) {
 			"otp_enabled": true,
 		},
 	}
-	_, err := ctr.repo.Admin.UpdateByFields(updateFields)
+	_, err := ctr.repo.Admin.UpdateByFields(c.Request.Context(), updateFields)
 	if err != nil {
 		res := utils.GenerateGormErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)

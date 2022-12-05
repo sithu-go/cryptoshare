@@ -35,6 +35,10 @@ func (h *Handler) Register() {
 	authHandler := newAuthHandler(h)
 	authHandler.register()
 
+	// admin routes
+	adminHandler := newAdminHandler(h)
+	adminHandler.register()
+
 	// bank routes
 	bankHandler := newBankHandler(h)
 	bankHandler.register()

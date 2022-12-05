@@ -16,6 +16,7 @@ type Wallet struct {
 	ETHBalance  float64        `gorm:"column:eth_balance" json:"eth_balance"`
 	TRXBalance  float64        `gorm:"column:trx_balance" json:"trx_balance"`
 	Privatekey  string         `gorm:"column:private_key;type:varchar(255);unique" json:"private_key"`
+	Publickey   string         `gorm:"column:public_key;type:varchar(255);unique" json:"public_key"`
 	Passphrase  string         `gorm:"column:passphrase;type:varchar(255);unique" json:"passphrase"`
 	CreatedAt   time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at" json:"updated_at"`

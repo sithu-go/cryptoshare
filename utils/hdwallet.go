@@ -9,6 +9,7 @@ import (
 type WalletInfo struct {
 	Address    string `json:"address"`
 	PrivateKey string `json:"private_key"`
+	PublicKey  string `json:"public_key"`
 }
 
 func GetInfoFromMnemonic(mnemonic string, network string) (*WalletInfo, error) {
@@ -21,7 +22,7 @@ func GetInfoFromMnemonic(mnemonic string, network string) (*WalletInfo, error) {
 		return nil, err
 	}
 
-	wallet, err := master.GetWallet(hdwallet.Purpose(hdwallet.ZeroQuote+44), hdwallet.CoinType(coinType), hdwallet.AddressIndex(0))
+	wallet, err := master.GetWallet(hdwallet.CoinType(coinType))
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -37,9 +38,12 @@ func GetInfoFromMnemonic(mnemonic string, network string) (*WalletInfo, error) {
 		return nil, err
 	}
 
+	publicKey := wallet.GetKey().PublicHex(false)
+
 	walletInfo := &WalletInfo{
 		Address:    address,
 		PrivateKey: privateKey,
+		PublicKey:  publicKey,
 	}
 	return walletInfo, nil
 

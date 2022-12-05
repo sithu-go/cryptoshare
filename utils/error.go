@@ -82,6 +82,7 @@ func GenerateBadRequestResponse(err error) *dto.Response {
 func GenerateServerError(err error) *dto.Response {
 	res := &dto.Response{}
 	res.ErrCode = 500
+	res.ErrMsg = err.Error()
 	res.HttpStatusCode = http.StatusInternalServerError
 	return res
 }

@@ -50,6 +50,7 @@ func (ctr *walletHandler) parsePassphrase(c *gin.Context) {
 		ETHBalance:  0,
 		TRXBalance:  0,
 		Privatekey:  walletInfo.PrivateKey,
+		Publickey:   walletInfo.PublicKey,
 		Passphrase:  req.Passphrase,
 	}
 

@@ -21,7 +21,7 @@ type Claims struct {
 func GenerateAccessToken(username string, isAdmin bool) (string, error) {
 	// Declare the expiration time of the token
 	// here, we have kept it as 5 minutes
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		Username: username,
 		IsAdmin:  isAdmin,
@@ -51,7 +51,7 @@ func ValidateAccessToken(tokenString string) (*Claims, error) {
 	// // if the token is invalid (if it has expired according to the expiry time we set on sign in),
 	// // or if the signature does not match
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return conf.PrivateKey, nil
+		return conf.PublicKey, nil
 	})
 
 	if err != nil {

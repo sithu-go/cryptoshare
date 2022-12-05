@@ -24,8 +24,8 @@ type HConfig struct {
 }
 
 func NewHandler(c *HConfig) *Handler {
-	repo := repository.NewRepository(c.DS)
 	svc := service.NewService()
+	repo := repository.NewRepository(c.DS, svc)
 	return &Handler{
 		R:    c.R,
 		repo: repo,

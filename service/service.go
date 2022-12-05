@@ -1,9 +1,12 @@
 package service
 
-import "cryptoshare/conf"
+import (
+	"cryptoshare/conf"
+)
 
 var (
-	apiKey = conf.TATUM_API_KEY
+	tatumBaseURL = conf.TATUM_BASE_URL
+	tatumApiKey  = conf.TATUM_API_KEY
 )
 
 type Service struct {

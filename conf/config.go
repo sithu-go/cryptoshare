@@ -79,4 +79,7 @@ func init() {
 	TATUM_BASE_URL = os.Getenv("TATUM_BASE_URL")
 	TATUM_API_KEY = os.Getenv("TATUM_API_KEY")
 
+	INFURA_BASE_URL = os.Getenv("INFURA_BASE_URL")
+	INFURA_API_KEY = os.Getenv("INFURA_API_KEY")
+
 }

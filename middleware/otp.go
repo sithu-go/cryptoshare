@@ -14,13 +14,16 @@ func OTPMiddleware(userType string) gin.HandlerFunc {
 		if err := ctx.ShouldBind(&req); err != nil {
 			res := utils.GenerateValidationErrorResponse(err)
 			ctx.JSON(res.HttpStatusCode, res)
+			ctx.Abort()
 			return
 		}
 		// user or admin
 		if userType == "admin" {
 			admin := ctx.MustGet(userType).(*model.Admin)
-			valid := utils.Validate2fa(req.OTP, admin.OTPSecret)
+			valid := utils.Validate2fa(req.OTP, *admin.OTPSecret)
 			if !valid {
+				res := utils.GenerateAuthErrorResponse(nil)
+				ctx.JSON(res.HttpStatusCode, res)
 				ctx.Abort()
 				return
 			}

@@ -20,6 +20,8 @@ func NewDataSource() (*DataSource, error) {
 
 	DB = db
 
+	go AddDefaultAdmin()
+
 	rdb, err := LoadRDB()
 	if err != nil {
 		return nil, err

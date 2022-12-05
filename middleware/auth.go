@@ -3,51 +3,66 @@ package middleware
 import (
 	"cryptoshare/repository"
 	"cryptoshare/utils"
-	"net/http"
+	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
+type authHeader struct {
+	AccessToken string `header:"Authorization"`
+}
+
 func AuthMiddleware(r *repository.Repository) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		token, err := ctx.Cookie("token")
-		if err != nil {
-			if err == http.ErrNoCookie {
-				// If the cookie is not set, return an unauthorized status
-				res := utils.GenerateAuthErrorResponse(err)
-				ctx.JSON(res.HttpStatusCode, res)
-				return
-			}
-			// For any other type of error, return a bad request status
-			res := utils.GenerateBadRequestResponse(err)
-			ctx.JSON(res.HttpStatusCode, res)
+	return func(c *gin.Context) {
+		h := authHeader{}
+
+		// bind Authorization Header to h and check for validation errors
+		if err := c.ShouldBindHeader(&h); err != nil {
+			res := utils.GenerateAuthErrorResponse(err)
+			c.JSON(res.HttpStatusCode, res)
+			c.Abort()
 			return
 		}
 
-		claim, err := utils.ValidateAccessToken(token)
-		if err != nil {
-			res := utils.GenerateAuthErrorResponse(err)
-			ctx.JSON(res.HttpStatusCode, res)
+		accessToken := strings.Split(h.AccessToken, "Bearer ")
+
+		if len(accessToken) != 2 {
+			res := utils.GenerateAuthErrorResponse(fmt.Errorf("permission denied"))
+			c.JSON(res.HttpStatusCode, res)
+			c.Abort()
 			return
 		}
+
+		// validate access token here
+		claim, err := utils.ValidateAccessToken(accessToken[1])
+		if err != nil {
+			res := utils.GenerateAuthErrorResponse(nil)
+			c.JSON(res.HttpStatusCode, res)
+			c.Abort()
+			return
+		}
+
 		if claim.IsAdmin {
 			admin, err := r.Admin.FindByField("username", claim.Username)
 			if err != nil {
 				res := utils.GenerateGormErrorResponse(err)
-				ctx.JSON(res.HttpStatusCode, res)
+				c.JSON(res.HttpStatusCode, res)
+				c.Abort()
 				return
 			}
-			ctx.Set("admin", admin)
+			c.Set("admin", admin)
 		} else {
 			user, err := r.User.FindByField("username", claim.Username)
 			if err != nil {
 				res := utils.GenerateGormErrorResponse(err)
-				ctx.JSON(res.HttpStatusCode, res)
+				c.JSON(res.HttpStatusCode, res)
+				c.Abort()
 				return
 			}
-			ctx.Set("user", user)
+			c.Set("user", user)
 		}
-		ctx.Next()
-
+		c.Set("token", accessToken[1])
+		c.Next()
 	}
 }
