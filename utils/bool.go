@@ -22,5 +22,5 @@ func IsValidationError(err error) bool {
 }
 
 func IsPrivateKey(privateKey string) bool {
-	return len(privateKey) != 64 || strings.Contains(privateKey, "*")
+	return len(privateKey) == 64 && !strings.Contains(privateKey, "*")
 }

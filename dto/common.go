@@ -2,7 +2,7 @@ package dto
 
 type RequestPayload struct {
 	Page     int `json:"page" form:"page" binding:"required"`
-	PageSize int `json:"page_size" form:"page_size"`
+	PageSize int `json:"page_size" form:"page_size" binding:"required"`
 }
 
 type Response struct {
@@ -21,7 +21,7 @@ type ReqByIDs struct {
 }
 
 type OTPReq struct {
-	OTP string `json:"otp" binding:"required"`
+	OTP string `json:"otp" form:"otp" binding:"required"`
 }
 
 type PassphraseReq struct {

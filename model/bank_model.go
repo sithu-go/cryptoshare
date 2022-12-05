@@ -7,12 +7,12 @@ import (
 )
 
 type Bank struct {
-	ID            uint64         `gorm:"column:id;primaryKey" json:"id"`
-	Name          string         `gorm:"column:name;type:varchar(100)" json:"name"`
-	WalletAddress string         `gorm:"column:wallet_address;type:varchar(255);not null;unique" json:"wallet_address"`
-	PrivateKey    string         `gorm:"column:private_key;not null;unique" json:"private_key"`
-	AddressType   string         `gorm:"column:address_type;type:enum('ERC20','TRC20');default:TRC20" json:"address_type"`
-	ScanRecord    string         `gorm:"column:scan_record;not null;unique" json:"scan_record"`
+	ID            *uint64        `gorm:"column:id;primaryKey" json:"id"`
+	Name          *string        `gorm:"column:name;type:varchar(100)" json:"name"`
+	WalletAddress *string        `gorm:"column:wallet_address;type:varchar(255);not null;unique" json:"wallet_address"`
+	PrivateKey    *string        `gorm:"column:private_key;not null;unique" json:"private_key"`
+	AddressType   *string        `gorm:"column:address_type;type:enum('ERC20','TRC20');default:TRC20" json:"address_type"`
+	ScanRecord    *string        `gorm:"column:scan_record;not null;unique" json:"scan_record"`
 	CreatedAt     time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt     time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"-"`

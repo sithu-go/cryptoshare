@@ -62,7 +62,6 @@ func AuthMiddleware(r *repository.Repository) gin.HandlerFunc {
 			}
 			c.Set("user", user)
 		}
-		c.Set("token", accessToken[1])
 		c.Next()
 	}
 }

@@ -3,11 +3,15 @@ package handler
 import (
 	"cryptoshare/dto"
 	"cryptoshare/middleware"
+	"cryptoshare/model"
 	"cryptoshare/repository"
 	"cryptoshare/utils"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 )
 
 type bankHandler struct {
@@ -27,7 +31,7 @@ func (ctr *bankHandler) register() {
 	group.Use(middleware.AuthMiddleware(ctr.repo))
 	group.GET("", ctr.getBanks)
 
-	middleware.OTPMiddleware("admin")
+	// group.Use(middleware.OTPMiddleware("admin"))
 	group.POST("", ctr.addBank)
 	group.PATCH("", ctr.editBank)
 	group.DELETE("", ctr.deleteBanks)
@@ -48,7 +52,7 @@ func (ctr *bankHandler) getBanks(c *gin.Context) {
 	}
 
 	for _, bank := range banks {
-		bank.PrivateKey = utils.GenerateRepeatedLetter("*", 64)
+		*bank.PrivateKey = utils.GenerateRepeatedLetter("*", 64)
 	}
 
 	res := &dto.Response{
@@ -70,19 +74,26 @@ func (ctr *bankHandler) addBank(c *gin.Context) {
 		return
 	}
 
-	encrytedPrivateKey, err := utils.EncryptAES(req.PrivateKey)
+	bank := model.Bank{}
+	if err := copier.Copy(&bank, &req); err != nil {
+		res := utils.GenerateServerError(err)
+		c.JSON(res.HttpStatusCode, res)
+		return
+	}
+
+	encrytedPrivateKey, err := utils.EncryptAES(*bank.PrivateKey)
 	if err != nil {
 		res := utils.GenerateGormErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)
 		return
 	}
 
-	req.PrivateKey = encrytedPrivateKey
+	bank.PrivateKey = &encrytedPrivateKey
 
-	bank := ctr.repo.Bank.TransformCreateBankModel(&req)
+	scanRecord := ctr.repo.Bank.GetAddressScanRecord(*bank.AddressType, *bank.WalletAddress)
+	bank.ScanRecord = &scanRecord
 
-	_, err = ctr.repo.Bank.Create(bank)
-	if err != nil {
+	if err := ctr.repo.Bank.Create(c.Request.Context(), &bank); err != nil {
 		res := utils.GenerateGormErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)
 		return
@@ -96,13 +107,24 @@ func (ctr *bankHandler) addBank(c *gin.Context) {
 
 func (ctr *bankHandler) editBank(c *gin.Context) {
 	req := dto.UpdateBankReq{}
+	fmt.Println("DSSDS")
 	if err := c.ShouldBind(&req); err != nil {
+		fmt.Println("DSSDS<", err.Error())
 		res := utils.GenerateValidationErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)
 		return
 	}
-	_, err := ctr.repo.Bank.Update(&req)
-	if err != nil {
+	log.Println("<>?????")
+	bank := model.Bank{}
+	log.Printf("%+v\n", req)
+
+	log.Printf("%+v\n", bank)
+	if err := copier.Copy(&bank, &req); err != nil {
+		res := utils.GenerateServerError(err)
+		c.JSON(res.HttpStatusCode, res)
+		return
+	}
+	if err := ctr.repo.Bank.Update(c.Request.Context(), &bank); err != nil {
 		res := utils.GenerateGormErrorResponse(err)
 		c.JSON(res.HttpStatusCode, res)
 		return

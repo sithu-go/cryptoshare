@@ -22,7 +22,7 @@ func OTPMiddleware(userType string) gin.HandlerFunc {
 			admin := ctx.MustGet(userType).(*model.Admin)
 			valid := utils.Validate2fa(req.OTP, *admin.OTPSecret)
 			if !valid {
-				res := utils.GenerateAuthErrorResponse(nil)
+				res := utils.GenerateWrongOTPResponse(nil)
 				ctx.JSON(res.HttpStatusCode, res)
 				ctx.Abort()
 				return

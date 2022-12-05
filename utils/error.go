@@ -4,15 +4,17 @@ import (
 	"cryptoshare/dto"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
 
 func msgForTag(fe validator.FieldError) string {
-	field := strings.ToLower(fe.Field())
+	field := CapitalToUnderScore(fe.Field())
 	switch fe.Tag() {
 	case "required":
+		return fmt.Sprintf("%v field is required.", field)
+	case "required_with":
+		fmt.Println(fe.Param(), "ADSSA")
 		return fmt.Sprintf("%v field is required.", field)
 	case "oneof":
 		return fmt.Sprintf("%v field must be one of %v", field, fe.Param())
@@ -67,6 +69,14 @@ func GenerateAuthErrorResponse(err error) *dto.Response {
 	res := &dto.Response{}
 	res.ErrCode = 401
 	res.ErrMsg = "pemission denied"
+	res.HttpStatusCode = http.StatusUnauthorized
+	return res
+}
+
+func GenerateWrongOTPResponse(err error) *dto.Response {
+	res := &dto.Response{}
+	res.ErrCode = 401
+	res.ErrMsg = "invalid otp"
 	res.HttpStatusCode = http.StatusUnauthorized
 	return res
 }

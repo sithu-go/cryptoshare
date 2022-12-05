@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"cryptoshare/ds"
 	"cryptoshare/dto"
 	"cryptoshare/model"
@@ -20,39 +21,24 @@ func newBankRepository(ds *ds.DataSource) *bankRepository {
 	}
 }
 
-func (r *bankRepository) Create(bank *model.Bank) (*model.Bank, error) {
-	db := r.DB.Model(&model.Bank{})
-	err := db.Create(&bank).Error
-	return bank, err
+func (r *bankRepository) Create(ctx context.Context, bank *model.Bank) error {
+	return r.DB.WithContext(ctx).Debug().Create(&bank).Error
 }
 
 // in that function, we don't update private key and wallet address
-func (r *bankRepository) Update(req *dto.UpdateBankReq) (*model.Bank, error) {
-	bank, err := r.FindByID(req.ID)
-	if err != nil {
-		return nil, err
+func (r *bankRepository) Update(ctx context.Context, bank *model.Bank) error {
+	if bank.WalletAddress != nil && bank.AddressType != nil {
+		scanRecord := r.GetAddressScanRecord(*bank.AddressType, *bank.WalletAddress)
+		bank.ScanRecord = &scanRecord
 	}
-
-	if req.Name != "" {
-		bank.Name = req.Name
-	}
-	if bank.WalletAddress != req.WalletAddress && req.WalletAddress != "" {
-		bank.WalletAddress = req.WalletAddress
-		bank.ScanRecord = r.GetAddressScanRecord(bank.AddressType, bank.WalletAddress)
-	}
-	if req.PrivateKey != "" {
-		encrytedPrivateKey, err := utils.EncryptAES(req.PrivateKey)
+	if bank.PrivateKey != nil {
+		encrytedPrivateKey, err := utils.EncryptAES(*bank.PrivateKey)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		bank.PrivateKey = encrytedPrivateKey
+		*bank.PrivateKey = encrytedPrivateKey
 	}
-	if req.AddressType != "" {
-		bank.AddressType = req.AddressType
-		bank.ScanRecord = r.GetAddressScanRecord(bank.AddressType, bank.WalletAddress)
-	}
-	_, err = r.Save(bank)
-	return nil, err
+	return r.DB.WithContext(ctx).Debug().Updates(bank).Error
 }
 
 func (r *bankRepository) Save(bank *model.Bank) (*model.Bank, error) {
@@ -83,17 +69,6 @@ func (r *bankRepository) FindAll(req *dto.RequestPayload) ([]*model.Bank, error)
 	db.Scopes(utils.Paginate(req.Page, req.PageSize))
 	err := db.Find(&banks).Error
 	return banks, err
-}
-
-func (r *bankRepository) TransformCreateBankModel(req *dto.CreateBankReq) *model.Bank {
-	scanRecord := r.GetAddressScanRecord(req.AddressType, req.WalletAddress)
-	return &model.Bank{
-		Name:          req.Name,
-		WalletAddress: req.WalletAddress,
-		PrivateKey:    req.PrivateKey,
-		AddressType:   req.AddressType,
-		ScanRecord:    scanRecord,
-	}
 }
 
 func (r *bankRepository) GetAddressScanRecord(addressType string, address string) string {
